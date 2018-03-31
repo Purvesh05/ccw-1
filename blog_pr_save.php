@@ -1,61 +1,8 @@
 <?php
-
+@ob_start();
 session_start();
-
-// For local hosting
-require('db_conn.php');
-
-/*$q = $_GET['id'];*/
-
-if(!$conn)
-{
-    $result = 500;
-    header("Location: result?res=$result"); 
-}
-else
-{
-  $roll_no = $_SESSION['rn'];
-  $email = $_SESSION['eid'];
-
-  $sql="SELECT  *  FROM  profiles  where  roll_no= $roll_no";
-  $result=mysqli_query($conn,$sql);
-  $row=mysqli_fetch_array($result);
-  $first_name = $row['first_name'];
-  //echo("$first_name");
-  $last_name = $row['last_name'];
-  $name = $first_name.' '.$last_name;
-  $gender = $row['gender'];
-   
-  if($row['role']=='null'){
-	  $role = 'Amatuer';
-  }
-  else if($row['role'] == 'developer' ){
-	  $role = 'Developer';
-  }
-  else {
-    $role = $row['role'];
-  }
-	
-  $role = $row['role'];
-	
-  $contact = $row['contact'];
-  $profession = $row['profession'];
-  if($row['dob'] == '0000-00-00')
-  {
-    $dob = NULL;
-  }
-  else
-  {
-    $dob = $row['dob'];
-  }
-  $hobbies = $row['hobbies'];
-  $languages = $row['languages_known'];
-  $previous_works = $row['previous_works'];
-  $github = $row['github'];
-  $linkedin = $row['linkedin'];
-}
-
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -190,6 +137,7 @@ else
 ================================================== -->
 </head>
 <body>
+
   <nav class="navbar navbar-expand-xl bg-light navbar-light">
       <a class="navbar-brand" href="index">Coders' Club</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar" style="box-shadow: 0px 3px 5px">
@@ -253,100 +201,163 @@ else
     		</div><!--col-3-->
     		
       <div class="col-9" id="form_area">
-        <div class="row">
-           <div class="col-xl-8" id="dp">
-            <center>
-            <?php
-              if(isset($row['profile_pic']))
-              {
-                  $profile_pic = $row['profile_pic'];
-                  echo '<img class="img-responsive rounded" src="data:image/png;base64,' . base64_encode($profile_pic) . '" height=150px width=150px/><br>';
-              }
-              else
-              {
-                  echo "<img class='img-responsive rounded' src='images/default.png' height='150' width='150px'><br>";
-              }
-            ?>
-          </center>
-          </div>
-          <div class="col-xl-4 ">
-                <?php
-                  if(isset($_SESSION['rn']) /*&& ($q == $_SESSION['rn'])*/){
-                    echo' <form action="edit_profile" name="profile" method="post">
-                            <input class="btn btn-primary align-self-center" type="submit" name="edit_profile" value="Edit Profile">
-                          </form>';
-                  }
-                  
-                ?>
-                
-          </div>
-        
-          
-          
-        </div>
-          <div >
-            <h4 style="text-align: center"><?=$role?></h4>
-          </div>
-        <div class="row" id="info">
-          <div id="attr">Roll No</div>
-          <div id="user_info"><b><?=$roll_no?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Name</div>
-          <div id="user_info"><b><?=$name?></b></div>
-        </div>
-        <div class="row" id="info" id="info">
-          <div id="attr">Gender</div>
-          <div id="user_info"><b><?=$gender?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Email ID</div>
-          <div id="user_info"><b><?=$email?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Role</div>
-          <div id="user_info"><b><?=$role?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Contact No</div>
-          <div id="user_info"><b><?=$contact?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Date of Birth</div>
-          <div id="user_info"><b><?=$dob?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Profession</div>
-          <div id="user_info"><b><?=$profession?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Hobbies</div>
-          <div id="user_info"><b><?=$hobbies?></b></div>
-        </div>
-        <div class="row" id="info">
-            <div id="attr">Programming Languages Known</div>
-            <div id="user_info"><b><?=$languages?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Previous Works (Any Projects)</div>
-          <div id="user_info"><b><?=$previous_works?></b></div>
-        </div>
-          <div >
-            <h4 style="text-align: center">Other Accounts</h4>
-          </div>
-        <div class="row" id="info">
-          <div id="attr">GitHub Account</div>
-          <div id="user_info"><b><?=$github?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">LinkedIn</div>
-          <div id="user_info"><b><?=$linkedin?></b></div>
-        </div>
-        <br>
-      </div> <!--col-9-->
+
+   		 	<?php
+	
+		
+		include("db_conn.php");
+		
+	    $roll_no = $_SESSION['rn'];
+		$user_name = $_SESSION['uname'];	
+		$user_email = $_SESSION['eid'];
+		  
+		
+				
+	
+
+				$sql1 = "Select * from blogs b,blog_saves bs where b.blog_id = bs.blog_id and user_id =$roll_no order by blog_timestamp desc";
+				$result1 = mysqli_query($conn,$sql1);
+					while($data = mysqli_fetch_array($result1))
+					{	
+						$blog_id=$data['blog_id'];
+						$title = $data['blog_title'];
+						$roll_no = $data['roll_no'];
+						$author = $data['blog_author'];
+						$category = $data['blog_category'];
+						$date = $data['blog_timestamp'];
+						$content = $data['blog_content'];
+
+						//Get all who have liked this blog
+						$query2="select roll_no,first_name,last_name from profiles where roll_no in (select user_id from blog_likes where blog_id=$blog_id);";
+						$result2=mysqli_query($conn,$query2);
+
+						//check if user has liked the blog
+						if(isset($_SESSION['rn'])){
+							$query3="select blog_id from blog_likes where blog_id=$blog_id and user_id=$blog_id;";
+							$result3=mysqli_query($conn,$query3);
+							if(mysqli_num_rows($result3)>0)
+							{
+								$liked=1;
+							}
+							else
+							{
+								$liked=0;
+							}							
+						}
+						else{
+							$liked=0;													
+						}
+
+						$query4="select count(*) from blog_likes where blog_id=$blog_id;";
+						$likes=mysqli_fetch_array(mysqli_query($conn,$query4));
+
+						//check if user has saved the blog
+						if(isset($_SESSION['rn'])){
+							$query5="select blog_id from blog_saves where blog_id=$blog_id and user_id=$blog_id;";
+							$result5=mysqli_query($conn,$query5);
+							if(mysqli_num_rows($result5)>0)
+							{
+								$saved=1;
+							}
+							else
+							{
+								$saved=0;
+							}							
+						}
+						else{
+							$saved=0;													
+						}
+
+					
+					?>	
+
+					<div class="card mb-5" id="<?php echo $blog_id ?>">
+						<div class="card-body">
+							<h4 style="margin:0" class="card-title font-weight-bold"><?php echo $title ?></h4>
+							<p style="margin:0"><a href="#"><em>by:<?php echo $author ?></em></a></p>
+							<p><span class="badge badge-pill badge-secondary"><a href="blogs.php?category=<?php echo $category ?>"><?php echo $category ?></a></span><p>
+							<p class="card-text blog_content"><?php echo $content ?></p>
+						</div>
+						<div class="card-footer noselect">
+							<?php
+							if($liked==1)
+							{
+								echo '<i id="unlike_'.$blog_id.'" class="like icon-heart icon-large"></i>&nbsp;';  
+							}
+							else
+							{
+								echo '<i id="like_'.$blog_id.'" class="like icon-heart-empty icon-large"></i>&nbsp;';  
+							}
+							?>
+							
+							<?php
+							if($saved==1)
+							{
+								echo '<i id="remove_'.$blog_id.'" class="save icon-bookmark icon-large"></i>&nbsp;';  
+							}
+							else
+							{
+								echo '<i id="save_'.$blog_id.'" class="save icon-bookmark-empty icon-large"></i>&nbsp;';  
+							}
+							?>
+
+							<i class="share icon-share-alt icon-large"></i>&nbsp;										
+							<div class="dropdown" style="display:inline;float:right">
+								<button style="padding:0px" class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<i class="icon-flag"></i>
+								</button>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+									<a class="dropdown-item" href="#">Report</a>
+								</div>
+							</div>
+							<p id="likes_<?php echo $blog_id ?>" class="likes_link small font-weight-bold" data-toggle="modal" data-target="#likesModal_<?php echo $blog_id; ?>">
+								<?php echo $likes[0] ?> likes
+							</p>
+							<p class="card-text"><small class="text-muted"><?php echo $date ?></small></p>
+						</div>
+					</div>
+					<!-- Likes Modal -->
+					<div id="likesModal_<?php echo $blog_id; ?>" class="modal fade" role="dialog">
+						<div class="modal-dialog">
+							<!-- Modal content-->
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title">Liked By:</h4>
+									<button type="button" class="close" data-dismiss="modal">&times;</button>
+								</div>
+								<div class="modal-body">
+									<?php
+										if(mysqli_num_rows($result2)>0)
+										{
+											while($data2 = mysqli_fetch_array($result2))
+											{
+												$liked_by = $data2['first_name']." ".$data2['last_name']." (".$data2['roll_no'].")";
+												echo "<p>".$liked_by."</p>";
+											}
+										}
+										else{
+											echo "No likes";
+										}
+									?>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<?php } ?>
+    		       		   
+    		   
+
+			
+			</div><!--col-9-->
      
 		</div> <!--row-->
   </div><!-- container-fluid-->
+  
+  
 
   <!--===========FOOTER======================-->
               <div id="footer">

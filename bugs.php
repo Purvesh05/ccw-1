@@ -1,61 +1,8 @@
 <?php
-
+@ob_start();
 session_start();
-
-// For local hosting
-require('db_conn.php');
-
-/*$q = $_GET['id'];*/
-
-if(!$conn)
-{
-    $result = 500;
-    header("Location: result?res=$result"); 
-}
-else
-{
-  $roll_no = $_SESSION['rn'];
-  $email = $_SESSION['eid'];
-
-  $sql="SELECT  *  FROM  profiles  where  roll_no= $roll_no";
-  $result=mysqli_query($conn,$sql);
-  $row=mysqli_fetch_array($result);
-  $first_name = $row['first_name'];
-  //echo("$first_name");
-  $last_name = $row['last_name'];
-  $name = $first_name.' '.$last_name;
-  $gender = $row['gender'];
-   
-  if($row['role']=='null'){
-	  $role = 'Amatuer';
-  }
-  else if($row['role'] == 'developer' ){
-	  $role = 'Developer';
-  }
-  else {
-    $role = $row['role'];
-  }
-	
-  $role = $row['role'];
-	
-  $contact = $row['contact'];
-  $profession = $row['profession'];
-  if($row['dob'] == '0000-00-00')
-  {
-    $dob = NULL;
-  }
-  else
-  {
-    $dob = $row['dob'];
-  }
-  $hobbies = $row['hobbies'];
-  $languages = $row['languages_known'];
-  $previous_works = $row['previous_works'];
-  $github = $row['github'];
-  $linkedin = $row['linkedin'];
-}
-
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -190,6 +137,7 @@ else
 ================================================== -->
 </head>
 <body>
+
   <nav class="navbar navbar-expand-xl bg-light navbar-light">
       <a class="navbar-brand" href="index">Coders' Club</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar" style="box-shadow: 0px 3px 5px">
@@ -253,100 +201,58 @@ else
     		</div><!--col-3-->
     		
       <div class="col-9" id="form_area">
-        <div class="row">
-           <div class="col-xl-8" id="dp">
-            <center>
-            <?php
-              if(isset($row['profile_pic']))
-              {
-                  $profile_pic = $row['profile_pic'];
-                  echo '<img class="img-responsive rounded" src="data:image/png;base64,' . base64_encode($profile_pic) . '" height=150px width=150px/><br>';
-              }
-              else
-              {
-                  echo "<img class='img-responsive rounded' src='images/default.png' height='150' width='150px'><br>";
-              }
-            ?>
-          </center>
-          </div>
-          <div class="col-xl-4 ">
-                <?php
-                  if(isset($_SESSION['rn']) /*&& ($q == $_SESSION['rn'])*/){
-                    echo' <form action="edit_profile" name="profile" method="post">
-                            <input class="btn btn-primary align-self-center" type="submit" name="edit_profile" value="Edit Profile">
-                          </form>';
-                  }
-                  
-                ?>
-                
-          </div>
-        
-          
-          
-        </div>
-          <div >
-            <h4 style="text-align: center"><?=$role?></h4>
-          </div>
-        <div class="row" id="info">
-          <div id="attr">Roll No</div>
-          <div id="user_info"><b><?=$roll_no?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Name</div>
-          <div id="user_info"><b><?=$name?></b></div>
-        </div>
-        <div class="row" id="info" id="info">
-          <div id="attr">Gender</div>
-          <div id="user_info"><b><?=$gender?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Email ID</div>
-          <div id="user_info"><b><?=$email?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Role</div>
-          <div id="user_info"><b><?=$role?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Contact No</div>
-          <div id="user_info"><b><?=$contact?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Date of Birth</div>
-          <div id="user_info"><b><?=$dob?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Profession</div>
-          <div id="user_info"><b><?=$profession?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Hobbies</div>
-          <div id="user_info"><b><?=$hobbies?></b></div>
-        </div>
-        <div class="row" id="info">
-            <div id="attr">Programming Languages Known</div>
-            <div id="user_info"><b><?=$languages?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">Previous Works (Any Projects)</div>
-          <div id="user_info"><b><?=$previous_works?></b></div>
-        </div>
-          <div >
-            <h4 style="text-align: center">Other Accounts</h4>
-          </div>
-        <div class="row" id="info">
-          <div id="attr">GitHub Account</div>
-          <div id="user_info"><b><?=$github?></b></div>
-        </div>
-        <div class="row" id="info">
-          <div id="attr">LinkedIn</div>
-          <div id="user_info"><b><?=$linkedin?></b></div>
-        </div>
-        <br>
-      </div> <!--col-9-->
+
+   		 	<?php
+	
+		
+		include("db_conn.php");
+		
+
+		$roll_no = $_SESSION['rn'];
+		$user_name = $_SESSION['uname'];	
+		$user_email = $_SESSION['eid'];
+	
+
+		  $query = "SELECT * FROM bug_reports where email = '$user_email'  ";
+		  $result = mysqli_query($conn,$query);
+		$count = mysqli_num_rows($result);
+				if($count == 0){
+						echo('<div class="alert bg-warning text-center"><h2 >You have not submitted bugs</h2></div>');
+				}
+		else{		
+		while( $row = mysqli_fetch_assoc($result)){
+			   $name = $row['name'];
+			   $email = $row['email'];
+			   $bug_info =$row['bug_info'];  	  
+			 
+			 
+		?>
+ 		
+  		<div class="card  text-center ">
+  			<div class="card-body p-2">
+  				<div class="title"><h4><?php echo $user_name;?></h4></div>
+  				<p><?=$bug_info ?></p>
+  			</div>
+  			<div class="card-footer p-1">
+  				<p class="text-muted lead">Email:  <?php echo $email ;?></p>
+ 
+  			</div>
+  		</div>
+  		<br>
+  		
+  		
+  		
+  		
+  		<?php } }?>
+  	
+    		   
+
+			</div><!--col--9-->
      
 		</div> <!--row-->
   </div><!-- container-fluid-->
+  
+  
 
   <!--===========FOOTER======================-->
               <div id="footer">
